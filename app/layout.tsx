@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "studio ÁTMO Casacor 2026",
-  description: "Experiencia mobile Nimbo",
+  description: "Vive la experiencia digital de studio ÁTMO en Casacor 2026.",
   icons: {
     icon: favicon.src,
     shortcut: favicon.src,
