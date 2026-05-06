@@ -5,7 +5,7 @@ import favicon from "@/assets/favicon.png";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nimbo",
+  title: "studio ÁTMO Casacor 2026",
   description: "Experiencia mobile Nimbo",
   icons: {
     icon: favicon.src,
