@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #050505;
+  --accent: rgba(255, 255, 255, 0.14);
+  --accent-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.9);
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --font-sans: Helvetica, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(1.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.step-screen-enter {
+  animation: step-enter 320ms ease-out both;
+}
+
+@keyframes step-layer-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.9rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-layer-enter {
+  animation: step-layer-enter 380ms ease-out both;
+}
