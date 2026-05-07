@@ -164,7 +164,7 @@ export function AtmoDessertForm() {
           <Button
             disabled={!canSubmit || isSubmitting}
             type="submit"
-            className="mt-[1.4rem] h-[3.4rem] w-full rounded-[0.9rem] border-2 border-white bg-white text-[1.15rem] font-[400] uppercase tracking-[-0.035em] text-black shadow-none hover:bg-white/90 disabled:border-white/30 disabled:bg-white/20 disabled:text-white/40"
+            className="mt-[1.4rem] h-10 w-full rounded-[0.7rem] border-2 border-white bg-white text-[1rem] font-[400] uppercase tracking-[-0.035em] text-black shadow-none hover:bg-white/90 disabled:border-white/30 disabled:bg-white/20 disabled:text-white/40"
           >
             {isSubmitting ? "Enviando" : "Enviar"}
           </Button>
@@ -223,7 +223,7 @@ export function AtmoDessertForm() {
               </p>
 
               <a
-                className="mx-auto mt-4 inline-flex h-[3rem] items-center justify-center gap-2 rounded-full border border-white px-5 text-[0.95rem] uppercase tracking-[-0.02em] text-white"
+                className="mx-auto mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full border border-white px-4 text-[0.85rem] uppercase tracking-[-0.02em] text-white"
                 href="instagram://story-camera"
               >
                 <InstagramIcon />

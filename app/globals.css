@@ -73,3 +73,59 @@ select {
 .step-layer-enter {
   animation: step-layer-enter 380ms ease-out both;
 }
+
+@media (max-width: 370px) {
+  .home-sculpture-title {
+    font-size: 2.8rem !important;
+  }
+
+  .home-nimbo-section {
+    height: 820px !important;
+  }
+
+  .home-nimbo-kicker {
+    font-size: 1.35rem !important;
+  }
+
+  .home-nimbo-title {
+    font-size: 2.8rem !important;
+  }
+
+  .home-nimbo-copy {
+    top: calc(29rem - 70px) !important;
+    display: flex;
+    height: 10.75rem !important;
+    flex-direction: column;
+    justify-content: center;
+    transform: none;
+  }
+
+  .home-nimbo-band {
+    top: calc(29.7rem - 70px) !important;
+    height: 10.75rem !important;
+  }
+
+  .home-nimbo-figure {
+    height: 20.5rem !important;
+  }
+
+  .home-flujo-figure {
+    top: calc(19.4rem - 10px) !important;
+    transform: translateY(-65px) scale(0.96);
+    transform-origin: left bottom;
+  }
+
+  .home-eco-figure {
+    top: calc(32.8rem - 30px) !important;
+  }
+
+  .home-presence-copy {
+    top: 40.8rem !important;
+    font-size: 1.02rem !important;
+    line-height: 1.32 !important;
+  }
+
+  .home-presence-copy p + p {
+    margin-top: 1.25rem !important;
+  }
+}
