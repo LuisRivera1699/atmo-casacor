@@ -68,24 +68,24 @@ export function NimboStepScreen({
   }
 
   return (
-    <main className="min-h-svh overflow-hidden bg-white">
+    <main className="h-svh overflow-hidden bg-white">
       <section
         key={step}
         className={cn(
-          "step-screen-enter relative isolate min-h-svh overflow-hidden bg-white px-[8vw] text-center text-black transition-all duration-300 ease-out",
+          "step-screen-enter relative isolate flex h-svh flex-col items-center justify-center overflow-hidden bg-white px-[8vw] text-center text-black transition-all duration-300 ease-out",
           isLeaving && "-translate-x-5 opacity-0",
         )}
       >
         <div className="absolute inset-x-0 bottom-0 top-[49.6svh] -z-10 rounded-t-[0.25rem] bg-[#0b0b0b]" />
 
-        <div className="step-layer-enter relative z-20 pt-[14.2svh]">
-          <h1 className="text-[clamp(1.75rem,6.1vw,2.25rem)] font-[700] uppercase leading-[1.04] tracking-[-0.075em]">
+        <div className="step-layer-enter relative z-20">
+          <h1 className="text-[clamp(1.75rem,6.1vw,2.25rem)] font-[700] uppercase leading-[1.04] tracking-[-0.075em] max-[370px]:!text-[1.42rem]">
             Encuentra esta pieza
             <br />y traela a la realidad
           </h1>
 
           <button
-            className="mt-[1.35rem] inline-flex h-[2.45rem] items-center gap-2 rounded-[0.7rem] bg-black px-4 text-[0.78rem] font-[400] tracking-[-0.035em] text-white"
+            className="mt-[0.9rem] inline-flex h-[2.35rem] items-center gap-2 rounded-[0.7rem] bg-black px-4 text-[0.78rem] font-[400] tracking-[-0.035em] text-white max-[370px]:h-[2.2rem] max-[370px]:text-[0.72rem]"
             type="button"
           >
             <SpaceIcon />
@@ -94,34 +94,34 @@ export function NimboStepScreen({
           </button>
         </div>
 
-        <div className="step-layer-enter relative z-10 mx-auto mt-[2.1rem] flex h-[28svh] items-end justify-center [animation-delay:90ms]">
+        <div className="step-layer-enter relative z-10 mx-auto mt-[1.2rem] flex h-[36svh] items-end justify-center [animation-delay:90ms] max-[370px]:h-[31.5svh]">
           <Image
             src={image}
             alt={imageAlt}
             className={cn(
-              "h-auto max-h-[28svh] max-w-none object-contain",
+              "h-auto max-h-[36svh] max-w-none object-contain max-[370px]:max-h-[31.5svh]",
               imageClassName,
             )}
             priority
           />
         </div>
 
-        <div className="step-layer-enter mt-[5.2svh] text-white [animation-delay:160ms]">
-          <p className="text-[clamp(1.55rem,5.45vw,2rem)] font-[400] leading-[1.58] tracking-[-0.06em]">
+        <div className="step-layer-enter mt-[3svh] text-white [animation-delay:160ms]">
+          <p className="text-[clamp(1.55rem,5.45vw,2rem)] font-[400] leading-[1.5] tracking-[-0.06em] max-[370px]:!text-[1.2rem]">
             Lo que ves a tu alrededor
             <br />
             no está colocado al azar.
           </p>
 
           <a
-            className="mx-auto mt-[6.2svh] inline-flex h-[2.7rem] min-w-[10.8rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-8 text-[clamp(1.05rem,3.8vw,1.35rem)] font-[400] uppercase tracking-[-0.035em] text-white transition-all hover:bg-white/10"
+            className="mx-auto mt-[1.7rem] inline-flex h-[2.55rem] min-w-[10.4rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-8 text-[clamp(1.05rem,3.8vw,1.35rem)] font-[400] uppercase tracking-[-0.035em] text-white transition-all hover:bg-white/10 max-[370px]:h-[2.35rem] max-[370px]:!text-[0.95rem]"
             href={nextHref}
             onClick={(event) => handleAnimatedNavigation(event, nextHref)}
           >
             Siguiente
           </a>
 
-          <div className="mt-[1.3rem] flex justify-center gap-[0.22rem]">
+          <div className="mt-[0.85rem] flex justify-center gap-[0.22rem]">
             {Array.from({ length: totalSteps }, (_, index) => {
               const dotStep = index + 1;
 
@@ -138,7 +138,7 @@ export function NimboStepScreen({
           </div>
 
           <a
-            className="mx-auto mt-[1.15rem] inline-flex items-center justify-center text-[0.82rem] font-[400] uppercase tracking-[0.08em] text-white/58 transition hover:text-white"
+            className="mx-auto mt-[0.8rem] inline-flex items-center justify-center text-[0.78rem] font-[400] uppercase tracking-[0.08em] text-white/58 transition hover:text-white"
             href={backHref}
             onClick={(event) => handleAnimatedNavigation(event, backHref)}
           >
