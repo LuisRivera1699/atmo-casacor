@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import ecoImage from "@/assets/eco.png";
 import flujoImage from "@/assets/flujo.png";
-import heroImage from "@/assets/hero-image.png";
 import middleBannerImage from "@/assets/middle-banner.png";
 import murosImage from "@/assets/muros.png";
 import nimboImage from "@/assets/nimbo.png";
@@ -22,10 +21,17 @@ export default function Home() {
         </a>
       </header>
 
-      <section
-        className="relative isolate flex min-h-svh w-full flex-col justify-center overflow-hidden bg-cover bg-[58%_center] px-[12.2vw] text-white"
-        style={{ backgroundImage: `url(${heroImage.src})` }}
-      >
+      <section className="relative isolate flex min-h-svh w-full flex-col justify-center overflow-hidden bg-black px-[12.2vw] text-white">
+        <video
+          aria-hidden="true"
+          autoPlay
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+          loop
+          muted
+          playsInline
+          preload="auto"
+          src="https://firebasestorage.googleapis.com/v0/b/atmo-67f01.firebasestorage.app/o/cms%2Fvideos%2F1765847087550-atmo-hero.mp4?alt=media&token=fee96900-7c0d-4a8e-a3fa-a766b2e0372d"
+        />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_14%,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.52)_23%,rgba(0,0,0,0)_45%),linear-gradient(180deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.32)_32%,rgba(0,0,0,0.42)_58%,rgba(0,0,0,0.86)_100%)]" />
         <div className="absolute inset-0 -z-10 bg-black/20" />
 
