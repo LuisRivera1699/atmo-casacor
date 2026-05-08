@@ -9,22 +9,21 @@ import {
   ColorManagement,
   DirectionalLight,
   EquirectangularReflectionMapping,
+  Group,
   PMREMGenerator,
-  PerspectiveCamera,
-  Scene,
   sRGBEncoding,
   Vector3,
   WebGLRenderer,
 } from "three";
-import type { Material, Mesh, Object3D, Texture } from "three";
+import type { Camera, Material, Mesh, Object3D, Texture } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
 
 import {
   getARLabelsForModel,
   type ARLabelConfig,
 } from "@/lib/ar-labels";
+import { getARModelTransformForStep } from "@/lib/ar-model-transforms";
 
 type LivingImageViewerProps = {
   modelSrc: string;
@@ -69,10 +68,7 @@ type PhysicalMaterialOverrides = Material & {
 
 ColorManagement.enabled = true;
 const labelSvgNamespace = "http://www.w3.org/2000/svg";
-const initialCameraDistance = 7;
-const minimumCameraDistance = 2;
-const autoRotateSpeed = 0.0038;
-const verticalCenteringOffset = -0.22;
+const horizontalRotationSpeed = 0.008;
 
 function getRendererPixelRatio() {
   const isMobile =
@@ -302,7 +298,7 @@ function createLabelOverlayElements(
 
 function updateLabelOverlay(
   labels: RuntimeLabel[],
-  camera: PerspectiveCamera,
+  camera: Camera,
   container: HTMLElement,
 ) {
   const bounds = container.getBoundingClientRect();
@@ -406,6 +402,15 @@ function updateLabelOverlay(
   }
 }
 
+function hideLabelOverlay(labels: RuntimeLabel[]) {
+  for (const label of labels) {
+    label.marker.style.opacity = "0";
+    label.path.style.opacity = "0";
+    label.text.style.opacity = "0";
+    label.smoothed = undefined;
+  }
+}
+
 function formatRuntimeError(error: unknown) {
   if (error instanceof Error) {
     return `${error.name}: ${error.message}`;
@@ -431,7 +436,6 @@ export function LivingImageViewer({
 }: LivingImageViewerProps) {
   const mindarContainerRef = useRef<HTMLDivElement>(null);
   const labelOverlayRef = useRef<HTMLDivElement>(null);
-  const modelContainerRef = useRef<HTMLDivElement>(null);
   const [modelLoadStatus, setModelLoadStatus] =
     useState<ModelLoadStatus>("loading");
   const [status, setStatus] = useState<ViewerStatus>("loading");
@@ -440,12 +444,10 @@ export function LivingImageViewer({
 
   useEffect(() => {
     let isDisposed = false;
-    let animationFrame = 0;
+    let isTargetVisible = false;
     let disposeLabelOverlay: (() => void) | undefined;
-    let disposeModelResize: (() => void) | undefined;
     let runtimeLabels: RuntimeLabel[] = [];
-    let modelRenderer: WebGLRenderer | null = null;
-    let controls: TrackballControls | null = null;
+    let disposeAnchoredModel: (() => void) | undefined;
     let mindarThree:
       | InstanceType<
           typeof import("mind-ar/dist/mindar-image-three.prod.js").MindARThree
@@ -495,24 +497,17 @@ export function LivingImageViewer({
       }
     }
 
-    function disposeModelViewer() {
-      cancelAnimationFrame(animationFrame);
-      controls?.dispose();
-      modelRenderer?.dispose();
-      modelRenderer?.domElement.remove();
-    }
+    async function setupAnchoredModel(
+      anchorGroup: Group,
+      currentMindarThree: InstanceType<
+        typeof import("mind-ar/dist/mindar-image-three.prod.js").MindARThree
+      >,
+      container: HTMLElement,
+    ) {
+      const { renderer, scene } = currentMindarThree;
 
-    async function setupModelViewer(container: HTMLElement) {
-      const scene = new Scene();
-      const camera = new PerspectiveCamera(
-        45,
-        container.clientWidth / container.clientHeight,
-        0.1,
-        100,
-      );
-      camera.position.set(0, 0, initialCameraDistance);
-
-      scene.add(new AmbientLight(0xffffff, 0.18));
+      const ambientLight = new AmbientLight(0xffffff, 0.18);
+      scene.add(ambientLight);
 
       const keyLight = new DirectionalLight(0xffffff, 0.72);
       keyLight.position.set(3, 4, 5);
@@ -522,18 +517,12 @@ export function LivingImageViewer({
       fillLight.position.set(-3, 2, 3);
       scene.add(fillLight);
 
-      const renderer = new WebGLRenderer({
-        alpha: true,
-        antialias: !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
-        powerPreference: "high-performance",
-      });
       renderer.outputEncoding = sRGBEncoding;
       renderer.useLegacyLights = false;
       renderer.toneMapping = ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.08;
       renderer.setPixelRatio(getRendererPixelRatio());
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      renderer.domElement.className = "h-full w-full touch-none";
+
       const handleContextLost = (event: Event) => {
         event.preventDefault();
         showRuntimeError(
@@ -546,46 +535,33 @@ export function LivingImageViewer({
         handleContextLost,
         false,
       );
-      container.appendChild(renderer.domElement);
-      modelRenderer = renderer;
-      let isUserInteracting = false;
-
-      function pauseAutoRotation() {
-        isUserInteracting = true;
-      }
-
-      function resumeAutoRotation() {
-        isUserInteracting = false;
-      }
-
-      renderer.domElement.addEventListener("pointerdown", pauseAutoRotation);
-      renderer.domElement.addEventListener("pointerup", resumeAutoRotation);
-      renderer.domElement.addEventListener("pointercancel", resumeAutoRotation);
-      renderer.domElement.addEventListener("touchstart", pauseAutoRotation, {
-        passive: true,
-      });
-      renderer.domElement.addEventListener("touchend", resumeAutoRotation);
-      renderer.domElement.addEventListener("touchcancel", resumeAutoRotation);
 
       const environment = createStudioEnvironment(renderer);
       scene.environment = environment.texture;
 
-      controls = new TrackballControls(camera, renderer.domElement);
-      controls.noPan = true;
-      controls.rotateSpeed = 2.4;
-      controls.zoomSpeed = 1.15;
-      controls.dynamicDampingFactor = 0.12;
-      controls.maxDistance = initialCameraDistance;
-      controls.minDistance = minimumCameraDistance;
-
       const dracoLoader = new DRACOLoader();
       dracoLoader.setDecoderPath("/draco/");
+
+      function disposeSceneResources() {
+        renderer.domElement.removeEventListener(
+          "webglcontextlost",
+          handleContextLost,
+          false,
+        );
+        scene.remove(ambientLight);
+        scene.remove(keyLight);
+        scene.remove(fillLight);
+        scene.environment = null;
+        environment.dispose();
+        dracoLoader.dispose();
+      }
 
       const loader = new GLTFLoader();
       loader.setDRACOLoader(dracoLoader);
       const gltf = await loader.loadAsync(modelSrc);
 
       if (isDisposed) {
+        disposeSceneResources();
         return;
       }
 
@@ -596,12 +572,65 @@ export function LivingImageViewer({
       const center = box.getCenter(new Vector3());
       const size = box.getSize(new Vector3());
       const maxDimension = Math.max(size.x, size.y, size.z);
-      const scale = maxDimension > 0 ? 2.1 / maxDimension : 1;
+      const transform = getARModelTransformForStep(
+        getStepNumberFromModelSrc(modelSrc),
+      );
+      const normalizedScale =
+        maxDimension > 0 ? transform.scale / maxDimension : transform.scale;
+      const modelRoot = new Group();
+      const [positionX, positionY, positionZ] = transform.position;
+      const [rotationX, rotationY, rotationZ] = transform.rotation;
 
-      model.position.sub(center);
-      model.scale.setScalar(scale);
-      model.position.y += verticalCenteringOffset;
-      scene.add(model);
+      model.position.set(
+        -center.x * normalizedScale,
+        -box.min.y * normalizedScale,
+        -center.z * normalizedScale,
+      );
+      model.scale.setScalar(normalizedScale);
+      modelRoot.position.set(positionX, positionY, positionZ);
+      modelRoot.rotation.set(rotationX, rotationY, rotationZ);
+      modelRoot.add(model);
+      anchorGroup.add(modelRoot);
+
+      let isDraggingModel = false;
+      let lastPointerX = 0;
+
+      function stopDraggingModel() {
+        isDraggingModel = false;
+      }
+
+      function handlePointerDown(event: PointerEvent) {
+        if (!isTargetVisible) {
+          return;
+        }
+
+        isDraggingModel = true;
+        lastPointerX = event.clientX;
+        container.setPointerCapture?.(event.pointerId);
+        event.preventDefault();
+      }
+
+      function handlePointerMove(event: PointerEvent) {
+        if (!isDraggingModel) {
+          return;
+        }
+
+        const deltaX = event.clientX - lastPointerX;
+        lastPointerX = event.clientX;
+        model.rotation.y += deltaX * horizontalRotationSpeed;
+        model.updateMatrixWorld(true);
+        event.preventDefault();
+      }
+
+      function handlePointerUp(event: PointerEvent) {
+        stopDraggingModel();
+        container.releasePointerCapture?.(event.pointerId);
+      }
+
+      container.addEventListener("pointerdown", handlePointerDown);
+      container.addEventListener("pointermove", handlePointerMove);
+      container.addEventListener("pointerup", handlePointerUp);
+      container.addEventListener("pointercancel", handlePointerUp);
 
       if (labelOverlayRef.current && labels.length > 0) {
         const labelOverlay = createLabelOverlayElements(
@@ -613,59 +642,15 @@ export function LivingImageViewer({
         disposeLabelOverlay = labelOverlay.dispose;
       }
 
-      function resize() {
-        if (!modelRenderer || !modelContainerRef.current) {
-          return;
-        }
-
-        const { clientWidth, clientHeight } = modelContainerRef.current;
-        camera.aspect = clientWidth / clientHeight;
-        camera.updateProjectionMatrix();
-        modelRenderer.setSize(clientWidth, clientHeight);
-      }
-
-      function render() {
-        try {
-          controls?.update();
-
-          if (!isUserInteracting) {
-            model.rotation.y += autoRotateSpeed;
-          }
-
-          model.updateMatrixWorld(true);
-          updateLabelOverlay(runtimeLabels, camera, container);
-          renderer.render(scene, camera);
-          animationFrame = window.requestAnimationFrame(render);
-        } catch (error) {
-          showRuntimeError("render", error);
-        }
-      }
-
-      window.addEventListener("resize", resize);
-      render();
       setModelLoadStatus("ready");
 
       return () => {
-        window.removeEventListener("resize", resize);
-        renderer.domElement.removeEventListener(
-          "webglcontextlost",
-          handleContextLost,
-          false,
-        );
-        renderer.domElement.removeEventListener("pointerdown", pauseAutoRotation);
-        renderer.domElement.removeEventListener("pointerup", resumeAutoRotation);
-        renderer.domElement.removeEventListener(
-          "pointercancel",
-          resumeAutoRotation,
-        );
-        renderer.domElement.removeEventListener("touchstart", pauseAutoRotation);
-        renderer.domElement.removeEventListener("touchend", resumeAutoRotation);
-        renderer.domElement.removeEventListener(
-          "touchcancel",
-          resumeAutoRotation,
-        );
-        environment.dispose();
-        dracoLoader.dispose();
+        container.removeEventListener("pointerdown", handlePointerDown);
+        container.removeEventListener("pointermove", handlePointerMove);
+        container.removeEventListener("pointerup", handlePointerUp);
+        container.removeEventListener("pointercancel", handlePointerUp);
+        anchorGroup.remove(modelRoot);
+        disposeSceneResources();
       };
     }
 
@@ -688,8 +673,15 @@ export function LivingImageViewer({
       });
 
       const anchor = mindarThree.addAnchor(0);
-      anchor.onTargetFound = () => setStatus("found");
-      anchor.onTargetLost = () => setStatus("scanning");
+      anchor.onTargetFound = () => {
+        isTargetVisible = true;
+        setStatus("found");
+      };
+      anchor.onTargetLost = () => {
+        isTargetVisible = false;
+        hideLabelOverlay(runtimeLabels);
+        setStatus("scanning");
+      };
 
       await mindarThree.start();
 
@@ -706,27 +698,42 @@ export function LivingImageViewer({
           return;
         }
 
-        mindarThree.renderer.render(mindarThree.scene, mindarThree.camera);
+        try {
+          if (isTargetVisible) {
+            updateLabelOverlay(runtimeLabels, mindarThree.camera, container);
+          } else {
+            hideLabelOverlay(runtimeLabels);
+          }
+
+          mindarThree.renderer.render(mindarThree.scene, mindarThree.camera);
+        } catch (error) {
+          showRuntimeError("render", error);
+        }
       });
+
+      return anchor.group;
     }
 
     async function setup() {
       const mindarContainer = mindarContainerRef.current;
-      const modelContainer = modelContainerRef.current;
 
-      if (!mindarContainer || !modelContainer) {
+      if (!mindarContainer) {
         return;
       }
 
       try {
         setModelLoadStatus("loading");
-        await setupMindAR(mindarContainer);
+        const anchorGroup = await setupMindAR(mindarContainer);
 
-        if (isDisposed) {
+        if (isDisposed || !mindarThree || !anchorGroup) {
           return;
         }
 
-        disposeModelResize = await setupModelViewer(modelContainer);
+        disposeAnchoredModel = await setupAnchoredModel(
+          anchorGroup,
+          mindarThree,
+          mindarContainer,
+        );
       } catch (error) {
         if (isDisposed) {
           return;
@@ -746,8 +753,7 @@ export function LivingImageViewer({
       mindarThree?.renderer.setAnimationLoop(null);
       mindarThree?.stop();
       disposeLabelOverlay?.();
-      disposeModelResize?.();
-      disposeModelViewer();
+      disposeAnchoredModel?.();
     };
   }, [labels, modelSrc, targetSrc]);
 
@@ -767,15 +773,7 @@ export function LivingImageViewer({
     >
       <div
         ref={mindarContainerRef}
-        className="absolute inset-0 overflow-hidden bg-black"
-      />
-
-      <div
-        ref={modelContainerRef}
-        className={[
-          "absolute inset-0 z-20 transition-opacity duration-300",
-          isModelVisible ? "opacity-100" : "opacity-0",
-        ].join(" ")}
+        className="absolute inset-0 touch-none overflow-hidden bg-black"
       />
 
       <div
@@ -792,7 +790,7 @@ export function LivingImageViewer({
         </p>
         <p className="mt-1 max-w-[17rem] text-[1rem] font-[400] leading-tight tracking-[-0.035em]">
           {isFound
-            ? "Disparador detectado. Puedes rotar la pieza con tus dedos."
+            ? "Disparador detectado. Mueve el díptico para explorar la pieza."
             : isModelReady && isScanning
               ? "Apunta la cámara al disparador en el díptico para revelar la pieza."
               : "Cargando modelo 3D..."}
