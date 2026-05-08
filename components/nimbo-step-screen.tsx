@@ -1,18 +1,50 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
+import dynamic from "next/dynamic";
 import { MouseEvent, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+const LivingImageViewer = dynamic(
+  () =>
+    import("@/components/ar/living-image-viewer").then(
+      (module) => module.LivingImageViewer,
+    ),
+  { ssr: false },
+);
+
+const PlanePlacementViewer = dynamic(
+  () =>
+    import("@/components/ar/plane-placement-viewer").then(
+      (module) => module.PlanePlacementViewer,
+    ),
+  { ssr: false },
+);
+
 type NimboStepScreenProps = {
+  arModelSrc?: string | null;
+  arTargetSrc: string;
   image: StaticImageData;
   imageAlt: string;
   imageClassName: string;
+  placementModelSrc?: string | null;
+  placementUsdzSrc?: string | null;
   step: number;
 };
 
 const totalSteps = 5;
+
+function isIOSChromeBrowser() {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  return (
+    /CriOS/i.test(navigator.userAgent) &&
+    /iPhone|iPad|iPod/i.test(navigator.userAgent)
+  );
+}
 
 function SpaceIcon() {
   return (
@@ -41,15 +73,24 @@ function SpaceIcon() {
 }
 
 export function NimboStepScreen({
+  arModelSrc,
+  arTargetSrc,
   image,
   imageAlt,
   imageClassName,
+  placementModelSrc,
+  placementUsdzSrc,
   step,
 }: NimboStepScreenProps) {
+  const [isArOpen, setIsArOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [isPlacementOpen, setIsPlacementOpen] = useState(false);
+  const [isSafariNoticeOpen, setIsSafariNoticeOpen] = useState(false);
+  const [hasCopiedSafariLink, setHasCopiedSafariLink] = useState(false);
   const nextStep = step + 1;
   const nextHref = step < totalSteps ? `/steps/${nextStep}` : "/finish";
   const backHref = step > 1 ? `/steps/${step - 1}` : "/start";
+  const isArAvailable = Boolean(arModelSrc);
 
   function handleAnimatedNavigation(
     event: MouseEvent<HTMLAnchorElement>,
@@ -65,6 +106,32 @@ export function NimboStepScreen({
     window.setTimeout(() => {
       window.location.href = href;
     }, 260);
+  }
+
+  function handleOpenPlacement() {
+    if (isIOSChromeBrowser()) {
+      setIsArOpen(false);
+      setIsSafariNoticeOpen(true);
+      setHasCopiedSafariLink(false);
+      return;
+    }
+
+    setIsArOpen(false);
+
+    window.setTimeout(() => {
+      setIsPlacementOpen(true);
+    }, 180);
+  }
+
+  async function handleOpenSafariInstructions() {
+    const safariUrl = window.location.href;
+
+    try {
+      await navigator.clipboard.writeText(safariUrl);
+      setHasCopiedSafariLink(true);
+    } catch {
+      setHasCopiedSafariLink(false);
+    }
   }
 
   return (
@@ -85,7 +152,13 @@ export function NimboStepScreen({
           </h1>
 
           <button
-            className="mt-[0.9rem] inline-flex h-[2.35rem] items-center gap-2 rounded-[0.7rem] bg-black px-4 text-[0.78rem] font-[400] tracking-[-0.035em] text-white max-[370px]:h-[2.2rem] max-[370px]:text-[0.72rem]"
+            aria-disabled={!isArAvailable}
+            className={cn(
+              "mt-[0.9rem] inline-flex h-[2.35rem] items-center gap-2 rounded-[0.7rem] bg-black px-4 text-[0.78rem] font-[400] tracking-[-0.035em] text-white transition max-[370px]:h-[2.2rem] max-[370px]:text-[0.72rem]",
+              !isArAvailable && "cursor-not-allowed opacity-[0.42]",
+            )}
+            disabled={!isArAvailable}
+            onClick={() => setIsArOpen(true)}
             type="button"
           >
             <SpaceIcon />
@@ -146,6 +219,68 @@ export function NimboStepScreen({
           </a>
         </div>
       </section>
+
+      {isArOpen && arModelSrc && (
+        <LivingImageViewer
+          modelSrc={arModelSrc}
+          onClose={() => setIsArOpen(false)}
+          onOpenPlacement={handleOpenPlacement}
+          placementModelSrc={placementModelSrc}
+          placementUsdzSrc={placementUsdzSrc}
+          targetSrc={arTargetSrc}
+        />
+      )}
+
+      {isPlacementOpen && placementModelSrc && (
+        <PlanePlacementViewer
+          modelSrc={placementModelSrc}
+          onClose={() => setIsPlacementOpen(false)}
+          usdzSrc={placementUsdzSrc}
+        />
+      )}
+
+      {isSafariNoticeOpen && (
+        <div
+          aria-modal="true"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/72 px-6 text-center text-white"
+          role="dialog"
+        >
+          <div className="w-full max-w-[19rem] rounded-[1.15rem] bg-white px-6 py-7 text-black shadow-[0_1.2rem_3rem_rgba(0,0,0,0.32)]">
+            <p className="text-[0.72rem] font-[500] uppercase tracking-[0.16em] text-black/45">
+              Living Nimbo Universe
+            </p>
+            <h2 className="mt-3 text-[1.65rem] font-[700] uppercase leading-[0.94] tracking-[-0.075em]">
+              Abre esta experiencia en Safari
+            </h2>
+            <p className="mt-4 text-[0.95rem] leading-snug tracking-[-0.035em] text-black/64">
+              En iPhone, Chrome no puede abrir esta experiencia AR de forma
+              confiable. Copiaremos el enlace para que lo pegues en Safari.
+            </p>
+
+            <button
+              className="mt-6 inline-flex h-[2.7rem] w-full items-center justify-center rounded-[0.78rem] bg-black px-5 text-[0.95rem] font-[500] tracking-[-0.035em] text-white"
+              onClick={handleOpenSafariInstructions}
+              type="button"
+            >
+              {hasCopiedSafariLink ? "Link copiado" : "Abrir en Safari"}
+            </button>
+
+            {hasCopiedSafariLink && (
+              <p className="mt-3 text-[0.78rem] leading-tight tracking-[-0.025em] text-black/52">
+                Ahora abre Safari y pega el enlace en la barra de dirección.
+              </p>
+            )}
+
+            <button
+              className="mt-5 text-[0.78rem] font-[500] uppercase tracking-[0.08em] text-black/46"
+              onClick={() => setIsSafariNoticeOpen(false)}
+              type="button"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
