@@ -2,15 +2,20 @@ export const AR_CONFIG_COLLECTION = "app-config";
 export const AR_CONFIG_DOC_ID = "ar";
 
 export const AR_TARGETS = {
+  dip: {
+    id: "dip",
+    label: "DIP",
+    src: "/ar/targets/dip.mind",
+  },
   nimbo: {
     id: "nimbo",
     label: "Nimbo",
     src: "/ar/targets/nimbo.mind",
   },
-  dip: {
-    id: "dip",
-    label: "DIP",
-    src: "/ar/targets/dip.mind",
+  nimbo1: {
+    id: "nimbo1",
+    label: "Nimbo 1",
+    src: "/ar/targets/nimbo1.mind",
   },
 } as const;
 
