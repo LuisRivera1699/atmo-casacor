@@ -1,9 +1,17 @@
 "use client";
 
+import { doc, onSnapshot } from "firebase/firestore";
 import Image, { type StaticImageData } from "next/image";
 import dynamic from "next/dynamic";
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 
+import {
+  AR_CONFIG_COLLECTION,
+  AR_CONFIG_DOC_ID,
+  getARActiveTargetId,
+  getARTargetSrc,
+} from "@/lib/ar-targets";
+import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
 
 const LivingImageViewer = dynamic(
@@ -87,10 +95,33 @@ export function NimboStepScreen({
   const [isPlacementOpen, setIsPlacementOpen] = useState(false);
   const [isSafariNoticeOpen, setIsSafariNoticeOpen] = useState(false);
   const [hasCopiedSafariLink, setHasCopiedSafariLink] = useState(false);
+  const [resolvedArTargetSrc, setResolvedArTargetSrc] = useState(arTargetSrc);
   const nextStep = step + 1;
   const nextHref = step < totalSteps ? `/steps/${nextStep}` : "/finish";
   const backHref = step > 1 ? `/steps/${step - 1}` : "/start";
   const isArAvailable = Boolean(arModelSrc);
+
+  useEffect(() => {
+    setResolvedArTargetSrc(arTargetSrc);
+
+    const configRef = doc(db, AR_CONFIG_COLLECTION, AR_CONFIG_DOC_ID);
+    const unsubscribe = onSnapshot(
+      configRef,
+      (snapshot) => {
+        const activeTargetId = getARActiveTargetId(
+          snapshot.data()?.activeTarget,
+        );
+
+        setResolvedArTargetSrc(getARTargetSrc(activeTargetId));
+      },
+      (error) => {
+        console.error("Error loading AR target config", error);
+        setResolvedArTargetSrc(arTargetSrc);
+      },
+    );
+
+    return unsubscribe;
+  }, [arTargetSrc]);
 
   function handleAnimatedNavigation(
     event: MouseEvent<HTMLAnchorElement>,
@@ -227,7 +258,7 @@ export function NimboStepScreen({
           onOpenPlacement={handleOpenPlacement}
           placementModelSrc={placementModelSrc}
           placementUsdzSrc={placementUsdzSrc}
-          targetSrc={arTargetSrc}
+          targetSrc={resolvedArTargetSrc}
         />
       )}
 

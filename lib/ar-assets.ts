@@ -1,7 +1,8 @@
 import "server-only";
 
+export { AR_TARGET_SRC } from "@/lib/ar-targets";
+
 export const TOTAL_STEPS = 5;
-export const AR_TARGET_SRC = "/ar/targets/nimbo.mind";
 
 type StepARAssets = {
   livingImageGlb: string;
