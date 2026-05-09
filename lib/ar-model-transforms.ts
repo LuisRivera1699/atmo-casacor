@@ -7,7 +7,7 @@ export type ARModelTransform = {
 const defaultTransform: ARModelTransform = {
   position: [0, 0, 0],
   rotation: [Math.PI / 2, 0, 0],
-  scale: 1.65,
+  scale: 1,
 };
 
 export const arModelTransformsByStep: Record<number, ARModelTransform> = {
