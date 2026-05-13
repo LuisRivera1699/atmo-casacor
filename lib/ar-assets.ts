@@ -20,9 +20,9 @@ export const remoteARAssetsByStep: Record<number, StepARAssets> = {
     livingImageGlb:
       "https://firebasestorage.googleapis.com/v0/b/atmo-67f01.firebasestorage.app/o/ar%2Fstep-2.glb?alt=media&token=c4a7f1c8-d1ae-4860-b472-d82ceaf2c259",
     placementGlb:
-      "https://firebasestorage.googleapis.com/v0/b/atmo-67f01.firebasestorage.app/o/ar%2Fstep-2-ip.glb?alt=media&token=9d4d28cc-0e8e-45a7-998b-7af4e926730a",
+      "https://firebasestorage.googleapis.com/v0/b/atmo-67f01.firebasestorage.app/o/ar%2Fancla.glb?alt=media&token=71668edf-7870-49f6-99dc-cb5dc4e5fef7",
     placementUsdz:
-      "https://firebasestorage.googleapis.com/v0/b/atmo-67f01.firebasestorage.app/o/ar%2Fstep-2-ip.usdz?alt=media&token=da6571a1-aa99-46c3-b053-1120d292b518",
+      "https://firebasestorage.googleapis.com/v0/b/atmo-67f01.firebasestorage.app/o/ar%2Fancla.usdz?alt=media&token=a43d2353-f9f9-406d-bf68-660f5218853c",
   },
   3: {
     livingImageGlb: "",
