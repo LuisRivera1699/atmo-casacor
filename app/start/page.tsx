@@ -31,7 +31,7 @@ export default function StartPage() {
           </div>
 
           <Link
-            href="/steps/1"
+            href="/steps/2"
             className="mt-[2.4rem] inline-flex h-[2.7rem] min-w-[10.6rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-8 text-[clamp(1.05rem,3.6vw,1.3rem)] font-[400] uppercase tracking-[-0.035em] text-white shadow-none transition-all hover:bg-white/10"
           >
             Empezar

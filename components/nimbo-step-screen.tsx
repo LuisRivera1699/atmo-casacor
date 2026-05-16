@@ -1,26 +1,10 @@
 "use client";
 
-import { doc, onSnapshot } from "firebase/firestore";
 import Image, { type StaticImageData } from "next/image";
 import dynamic from "next/dynamic";
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useRef, useState } from "react";
 
-import {
-  AR_CONFIG_COLLECTION,
-  AR_CONFIG_DOC_ID,
-  getARActiveTargetId,
-  getARTargetSrc,
-} from "@/lib/ar-targets";
-import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
-
-const LivingImageViewer = dynamic(
-  () =>
-    import("@/components/ar/living-image-viewer").then(
-      (module) => module.LivingImageViewer,
-    ),
-  { ssr: false },
-);
 
 const PlanePlacementViewer = dynamic(
   () =>
@@ -31,8 +15,6 @@ const PlanePlacementViewer = dynamic(
 );
 
 type NimboStepScreenProps = {
-  arModelSrc?: string | null;
-  arTargetSrc: string;
   image: StaticImageData;
   imageAlt: string;
   imageClassName: string;
@@ -41,17 +23,39 @@ type NimboStepScreenProps = {
   step: number;
 };
 
-const totalSteps = 5;
+const visibleSteps = [2, 5] as const;
+const quickLookPreviewImageSrc =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 
-function isIOSChromeBrowser() {
+function isIOSDevice() {
   if (typeof navigator === "undefined") {
     return false;
   }
 
-  return (
-    /CriOS/i.test(navigator.userAgent) &&
-    /iPhone|iPad|iPod/i.test(navigator.userAgent)
-  );
+  return /iPad|iPhone|iPod/i.test(navigator.userAgent);
+}
+
+function isAndroidDevice() {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  return /Android/i.test(navigator.userAgent);
+}
+
+function getAbsoluteAssetUrl(src?: string | null) {
+  if (!src || typeof window === "undefined") {
+    return src ?? "";
+  }
+
+  return new URL(src, window.location.href).toString();
+}
+
+function getSceneViewerIntentUrl(modelSrc: string) {
+  const fileUrl = encodeURIComponent(getAbsoluteAssetUrl(modelSrc));
+  const fallbackUrl = encodeURIComponent(window.location.href);
+
+  return `intent://arvr.google.com/scene-viewer/1.0?file=${fileUrl}&mode=ar_preferred&title=Living%20Nimbo%20Universe#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${fallbackUrl};end;`;
 }
 
 function SpaceIcon() {
@@ -81,8 +85,6 @@ function SpaceIcon() {
 }
 
 export function NimboStepScreen({
-  arModelSrc,
-  arTargetSrc,
   image,
   imageAlt,
   imageClassName,
@@ -90,38 +92,19 @@ export function NimboStepScreen({
   placementUsdzSrc,
   step,
 }: NimboStepScreenProps) {
-  const [isArOpen, setIsArOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const [isPlacementOpen, setIsPlacementOpen] = useState(false);
-  const [isSafariNoticeOpen, setIsSafariNoticeOpen] = useState(false);
-  const [hasCopiedSafariLink, setHasCopiedSafariLink] = useState(false);
-  const [resolvedArTargetSrc, setResolvedArTargetSrc] = useState(arTargetSrc);
-  const nextStep = step + 1;
-  const nextHref = step < totalSteps ? `/steps/${nextStep}` : "/finish";
-  const backHref = step > 1 ? `/steps/${step - 1}` : "/start";
-  const isArAvailable = Boolean(arModelSrc);
-
-  useEffect(() => {
-    setResolvedArTargetSrc(arTargetSrc);
-
-    const configRef = doc(db, AR_CONFIG_COLLECTION, AR_CONFIG_DOC_ID);
-    const unsubscribe = onSnapshot(
-      configRef,
-      (snapshot) => {
-        const activeTargetId = getARActiveTargetId(
-          snapshot.data()?.activeTarget,
-        );
-
-        setResolvedArTargetSrc(getARTargetSrc(activeTargetId));
-      },
-      (error) => {
-        console.error("Error loading AR target config", error);
-        setResolvedArTargetSrc(arTargetSrc);
-      },
-    );
-
-    return unsubscribe;
-  }, [arTargetSrc]);
+  const quickLookAnchorRef = useRef<HTMLAnchorElement | null>(null);
+  const currentStepIndex = visibleSteps.findIndex(
+    (visibleStep) => visibleStep === step,
+  );
+  const nextVisibleStep = visibleSteps[currentStepIndex + 1];
+  const previousVisibleStep = visibleSteps[currentStepIndex - 1];
+  const nextHref = nextVisibleStep ? `/steps/${nextVisibleStep}` : "/finish";
+  const backHref = previousVisibleStep
+    ? `/steps/${previousVisibleStep}`
+    : "/start";
+  const isArAvailable = Boolean(placementModelSrc || placementUsdzSrc);
 
   function handleAnimatedNavigation(
     event: MouseEvent<HTMLAnchorElement>,
@@ -139,30 +122,18 @@ export function NimboStepScreen({
     }, 260);
   }
 
-  function handleOpenPlacement() {
-    if (isIOSChromeBrowser()) {
-      setIsArOpen(false);
-      setIsSafariNoticeOpen(true);
-      setHasCopiedSafariLink(false);
+  function handleOpenNativeAR() {
+    if (isIOSDevice()) {
+      quickLookAnchorRef.current?.click();
       return;
     }
 
-    setIsArOpen(false);
-
-    window.setTimeout(() => {
-      setIsPlacementOpen(true);
-    }, 180);
-  }
-
-  async function handleOpenSafariInstructions() {
-    const safariUrl = window.location.href;
-
-    try {
-      await navigator.clipboard.writeText(safariUrl);
-      setHasCopiedSafariLink(true);
-    } catch {
-      setHasCopiedSafariLink(false);
+    if (isAndroidDevice() && placementModelSrc) {
+      window.location.href = getSceneViewerIntentUrl(placementModelSrc);
+      return;
     }
+
+    setIsPlacementOpen(true);
   }
 
   return (
@@ -189,7 +160,7 @@ export function NimboStepScreen({
               !isArAvailable && "cursor-not-allowed opacity-[0.42]",
             )}
             disabled={!isArAvailable}
-            onClick={() => setIsArOpen(true)}
+            onClick={handleOpenNativeAR}
             type="button"
           >
             <SpaceIcon />
@@ -226,9 +197,7 @@ export function NimboStepScreen({
           </a>
 
           <div className="mt-[0.85rem] flex justify-center gap-[0.22rem]">
-            {Array.from({ length: totalSteps }, (_, index) => {
-              const dotStep = index + 1;
-
+            {visibleSteps.map((dotStep) => {
               return (
                 <span
                   key={dotStep}
@@ -251,15 +220,17 @@ export function NimboStepScreen({
         </div>
       </section>
 
-      {isArOpen && arModelSrc && (
-        <LivingImageViewer
-          modelSrc={arModelSrc}
-          onClose={() => setIsArOpen(false)}
-          onOpenPlacement={handleOpenPlacement}
-          placementModelSrc={placementModelSrc}
-          placementUsdzSrc={placementUsdzSrc}
-          targetSrc={resolvedArTargetSrc}
-        />
+      {placementUsdzSrc && (
+        <a
+          ref={quickLookAnchorRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+          href={getAbsoluteAssetUrl(placementUsdzSrc)}
+          rel="ar"
+          tabIndex={-1}
+        >
+          <img alt="" src={quickLookPreviewImageSrc} />
+        </a>
       )}
 
       {isPlacementOpen && placementModelSrc && (
@@ -268,49 +239,6 @@ export function NimboStepScreen({
           onClose={() => setIsPlacementOpen(false)}
           usdzSrc={placementUsdzSrc}
         />
-      )}
-
-      {isSafariNoticeOpen && (
-        <div
-          aria-modal="true"
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/72 px-6 text-center text-white"
-          role="dialog"
-        >
-          <div className="w-full max-w-[19rem] rounded-[1.15rem] bg-white px-6 py-7 text-black shadow-[0_1.2rem_3rem_rgba(0,0,0,0.32)]">
-            <p className="text-[0.72rem] font-[500] uppercase tracking-[0.16em] text-black/45">
-              Living Nimbo Universe
-            </p>
-            <h2 className="mt-3 text-[1.65rem] font-[700] uppercase leading-[0.94] tracking-[-0.075em]">
-              Abre esta experiencia en Safari
-            </h2>
-            <p className="mt-4 text-[0.95rem] leading-snug tracking-[-0.035em] text-black/64">
-              En iPhone, Chrome no puede abrir esta experiencia AR de forma
-              confiable. Copiaremos el enlace para que lo pegues en Safari.
-            </p>
-
-            <button
-              className="mt-6 inline-flex h-[2.7rem] w-full items-center justify-center rounded-[0.78rem] bg-black px-5 text-[0.95rem] font-[500] tracking-[-0.035em] text-white"
-              onClick={handleOpenSafariInstructions}
-              type="button"
-            >
-              {hasCopiedSafariLink ? "Link copiado" : "Abrir en Safari"}
-            </button>
-
-            {hasCopiedSafariLink && (
-              <p className="mt-3 text-[0.78rem] leading-tight tracking-[-0.025em] text-black/52">
-                Ahora abre Safari y pega el enlace en la barra de dirección.
-              </p>
-            )}
-
-            <button
-              className="mt-5 text-[0.78rem] font-[500] uppercase tracking-[0.08em] text-black/46"
-              onClick={() => setIsSafariNoticeOpen(false)}
-              type="button"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
       )}
     </main>
   );
