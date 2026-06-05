@@ -1,4 +1,4 @@
-import bgStartImage from "@/assets/bg-start.png";
+import finishBackground from "@/assets/finish-background.webp";
 
 function InstagramIcon() {
   return (
@@ -27,8 +27,8 @@ export default function FinishPage() {
   return (
     <main className="h-svh overflow-hidden bg-black">
       <section
-        className="relative isolate flex h-svh w-full items-center justify-center overflow-hidden bg-cover bg-[58%_center] px-[8vw] text-center text-white"
-        style={{ backgroundImage: `url(${bgStartImage.src})` }}
+        className="relative isolate flex h-svh w-full items-center justify-center overflow-hidden bg-cover bg-center px-[8vw] text-center text-white"
+        style={{ backgroundImage: `url(${finishBackground.src})` }}
       >
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.5)_28%,rgba(0,0,0,0.56)_62%,rgba(0,0,0,0.78)_100%)]" />
         <div className="absolute inset-0 -z-10 bg-black/30" />

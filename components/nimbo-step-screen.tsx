@@ -15,6 +15,8 @@ const PlanePlacementViewer = dynamic(
 );
 
 type NimboStepScreenProps = {
+  backgroundImage?: StaticImageData;
+  backgroundPosition?: string;
   image: StaticImageData;
   imageAlt: string;
   imageClassName: string;
@@ -23,7 +25,7 @@ type NimboStepScreenProps = {
   step: number;
 };
 
-const visibleSteps = [2, 5] as const;
+const visibleSteps = [5] as const;
 const quickLookPreviewImageSrc =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 
@@ -85,6 +87,8 @@ function SpaceIcon() {
 }
 
 export function NimboStepScreen({
+  backgroundImage,
+  backgroundPosition = "center",
   image,
   imageAlt,
   imageClassName,
@@ -136,19 +140,47 @@ export function NimboStepScreen({
     setIsPlacementOpen(true);
   }
 
+  const hasBackgroundImage = Boolean(backgroundImage);
+
   return (
-    <main className="h-svh overflow-hidden bg-white">
+    <main
+      className={cn(
+        "h-svh overflow-hidden",
+        hasBackgroundImage ? "bg-black" : "bg-white",
+      )}
+    >
       <section
         key={step}
         className={cn(
-          "step-screen-enter relative isolate flex h-svh flex-col items-center justify-center overflow-hidden bg-white px-[8vw] text-center text-black transition-all duration-300 ease-out",
+          "step-screen-enter relative isolate flex h-svh flex-col items-center justify-center overflow-hidden bg-cover px-[8vw] text-center transition-all duration-300 ease-out",
+          hasBackgroundImage ? "text-white" : "bg-white text-black",
           isLeaving && "-translate-x-5 opacity-0",
         )}
+        style={
+          backgroundImage
+            ? {
+                backgroundImage: `url(${backgroundImage.src})`,
+                backgroundPosition,
+              }
+            : undefined
+        }
       >
-        <div className="absolute inset-x-0 bottom-0 top-[49.6svh] -z-10 rounded-t-[0.25rem] bg-[#0b0b0b]" />
+        {hasBackgroundImage ? (
+          <>
+            <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.34)_34%,rgba(0,0,0,0.48)_62%,rgba(0,0,0,0.76)_100%)]" />
+            <div className="absolute inset-0 -z-10 bg-black/18" />
+          </>
+        ) : (
+          <div className="absolute inset-x-0 bottom-0 top-[49.6svh] -z-10 rounded-t-[0.25rem] bg-[#0b0b0b]" />
+        )}
 
         <div className="step-layer-enter relative z-20">
-          <h1 className="text-[clamp(1.75rem,6.1vw,2.25rem)] font-[700] uppercase leading-[1.04] tracking-[-0.075em] max-[370px]:!text-[1.42rem]">
+          <h1
+            className={cn(
+              "text-[clamp(1.75rem,6.1vw,2.25rem)] font-[700] uppercase leading-[1.04] tracking-[-0.075em] max-[370px]:!text-[1.42rem]",
+              hasBackgroundImage && "text-white",
+            )}
+          >
             Encuentra esta pieza
             <br />y traela a la realidad
           </h1>
@@ -156,7 +188,10 @@ export function NimboStepScreen({
           <button
             aria-disabled={!isArAvailable}
             className={cn(
-              "mt-[0.9rem] inline-flex h-[2.35rem] items-center gap-2 rounded-[0.7rem] bg-black px-4 text-[0.78rem] font-[400] tracking-[-0.035em] text-white transition max-[370px]:h-[2.2rem] max-[370px]:text-[0.72rem]",
+              "mt-[0.9rem] inline-flex h-[2.35rem] items-center gap-2 rounded-[0.7rem] px-4 text-[0.78rem] font-[400] tracking-[-0.035em] transition max-[370px]:h-[2.2rem] max-[370px]:text-[0.72rem]",
+              hasBackgroundImage
+                ? "border border-white/85 bg-black/45 text-white backdrop-blur-[2px]"
+                : "bg-black text-white",
               !isArAvailable && "cursor-not-allowed opacity-[0.42]",
             )}
             disabled={!isArAvailable}
@@ -188,35 +223,39 @@ export function NimboStepScreen({
             no está colocado al azar.
           </p>
 
-          <a
-            className="mx-auto mt-[1.7rem] inline-flex h-[2.55rem] min-w-[10.4rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-8 text-[clamp(1.05rem,3.8vw,1.35rem)] font-[400] uppercase tracking-[-0.035em] text-white transition-all hover:bg-white/10 max-[370px]:h-[2.35rem] max-[370px]:!text-[0.95rem]"
-            href={nextHref}
-            onClick={(event) => handleAnimatedNavigation(event, nextHref)}
-          >
-            Siguiente
-          </a>
+          <div className="mx-auto mt-[1.7rem] flex items-center justify-center gap-[1.1rem]">
+            <a
+              className="inline-flex h-[2.55rem] min-w-[10.4rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-8 text-[clamp(1.05rem,3.8vw,1.35rem)] font-[400] uppercase tracking-[-0.035em] text-white transition-all hover:bg-white/10 max-[370px]:h-[2.35rem] max-[370px]:!text-[0.95rem]"
+              href={nextHref}
+              onClick={(event) => handleAnimatedNavigation(event, nextHref)}
+            >
+              Siguiente
+            </a>
 
-          <div className="mt-[0.85rem] flex justify-center gap-[0.22rem]">
-            {visibleSteps.map((dotStep) => {
-              return (
-                <span
-                  key={dotStep}
-                  className={cn(
-                    "h-[0.38rem] w-[0.38rem] rounded-full",
-                    dotStep === step ? "bg-white" : "bg-white/42",
-                  )}
-                />
-              );
-            })}
+            <a
+              className="inline-flex items-center justify-center text-[0.78rem] font-[400] uppercase tracking-[0.08em] text-white/58 transition hover:text-white"
+              href={backHref}
+              onClick={(event) => handleAnimatedNavigation(event, backHref)}
+            >
+              Atrás
+            </a>
           </div>
 
-          <a
-            className="mx-auto mt-[0.8rem] inline-flex items-center justify-center text-[0.78rem] font-[400] uppercase tracking-[0.08em] text-white/58 transition hover:text-white"
-            href={backHref}
-            onClick={(event) => handleAnimatedNavigation(event, backHref)}
-          >
-            Atrás
-          </a>
+          {visibleSteps.length > 1 && (
+            <div className="mt-[0.85rem] flex justify-center gap-[0.22rem]">
+              {visibleSteps.map((dotStep) => {
+                return (
+                  <span
+                    key={dotStep}
+                    className={cn(
+                      "h-[0.38rem] w-[0.38rem] rounded-full",
+                      dotStep === step ? "bg-white" : "bg-white/42",
+                    )}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

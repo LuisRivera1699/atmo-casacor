@@ -3,8 +3,17 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { FormEvent, useState } from "react";
 
+import formBackground from "@/assets/form-background.webp";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
+
+const favoriteArtworkOptions = [
+  "Nimbo Parado",
+  "Nimbo Pausa",
+  "Nimbus",
+  "Ecos",
+  "Anclas del tiempo",
+] as const;
 
 function InstagramIcon() {
   return (
@@ -65,6 +74,7 @@ export function AtmoDessertForm() {
       .trim()
       .toLowerCase();
     const phone = String(formData.get("phone") ?? "").trim();
+    const favoriteArtwork = String(formData.get("favoriteArtwork") ?? "").trim();
 
     setIsSubmitting(true);
     setSubmitError("");
@@ -74,6 +84,7 @@ export function AtmoDessertForm() {
         name: trimmedName,
         email: trimmedEmail,
         phone,
+        favoriteArtwork,
         commercialConsent: true,
         source: "casacor-mobile-web",
         createdAt: serverTimestamp(),
@@ -92,8 +103,15 @@ export function AtmoDessertForm() {
   }
 
   return (
-    <section id="formulario" className="bg-black px-[8vw] py-[4.75rem] text-white">
-      <div className="mx-auto max-w-[26rem]">
+    <section
+      id="formulario"
+      className="relative isolate overflow-hidden bg-cover bg-center px-[8vw] py-[4.75rem] text-white"
+      style={{ backgroundImage: `url(${formBackground.src})` }}
+    >
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.58)_38%,rgba(0,0,0,0.68)_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-black/35" />
+
+      <div className="relative z-10 mx-auto max-w-[26rem]">
         <p className="text-center text-[clamp(1.55rem,5.35vw,2rem)] font-[400] leading-[1.25] tracking-[-0.055em]">
           Recibe un postre <span className="font-[650]">ÁTMO</span> gratis,
           realizado por Alanya.
@@ -144,6 +162,24 @@ export function AtmoDessertForm() {
             />
           </label>
 
+          <label className="block">
+            <span className="mb-2 block text-[0.95rem] tracking-[-0.02em] text-white/82">
+              Obra favorita <span className="text-white/60">(opcional)</span>
+            </span>
+            <select
+              className="h-[3.35rem] w-full appearance-none rounded-[0.9rem] border border-white/55 bg-black px-4 text-[1rem] text-white outline-none transition focus:border-white"
+              defaultValue=""
+              name="favoriteArtwork"
+            >
+              <option value="">Selecciona una obra</option>
+              {favoriteArtworkOptions.map((artwork) => (
+                <option key={artwork} value={artwork}>
+                  {artwork}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label className="flex gap-3 pt-[0.3rem] text-[0.82rem] font-[400] leading-[1.35] tracking-[-0.025em] text-white/72">
             <input
               className="mt-1 h-5 w-5 shrink-0 accent-white"
@@ -178,7 +214,7 @@ export function AtmoDessertForm() {
       </div>
 
       <a
-        className="mx-auto mt-[4rem] block w-fit text-center text-[0.78rem] tracking-[-0.02em] text-white/42 underline-offset-4 hover:text-white/70 hover:underline"
+        className="relative z-10 mx-auto mt-[4rem] block w-fit text-center text-[0.78rem] tracking-[-0.02em] text-white/42 underline-offset-4 hover:text-white/70 hover:underline"
         href="https://teamaurora.pe"
         rel="noreferrer"
         target="_blank"

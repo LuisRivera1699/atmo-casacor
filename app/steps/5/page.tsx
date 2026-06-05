@@ -1,3 +1,4 @@
+import stepBackground from "@/assets/step-background.webp";
 import stepImage from "@/assets/step-5.png";
 import { NimboStepScreen } from "@/components/nimbo-step-screen";
 import {
@@ -12,6 +13,8 @@ export default function StepFivePage() {
 
   return (
     <NimboStepScreen
+      backgroundImage={stepBackground}
+      backgroundPosition="center 42%"
       image={stepImage}
       imageAlt="Pieza Nimbo flujo"
       imageClassName="h-full w-auto scale-[1.08]"

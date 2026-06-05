@@ -1,4 +1,7 @@
+import Image from "next/image";
 import bgStartImage from "@/assets/bg-start.png";
+import atmoLogo from "@/assets/atmo.png";
+import peatonalLogo from "@/assets/peatonal.avif";
 import Link from "next/link";
 
 export default function StartPage() {
@@ -31,11 +34,24 @@ export default function StartPage() {
           </div>
 
           <Link
-            href="/steps/2"
+            href="/steps/5"
             className="mt-[2.4rem] inline-flex h-[2.7rem] min-w-[10.6rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-8 text-[clamp(1.05rem,3.6vw,1.3rem)] font-[400] uppercase tracking-[-0.035em] text-white shadow-none transition-all hover:bg-white/10"
           >
             Empezar
           </Link>
+
+          <div className="mt-[1.7rem] flex h-[2.1rem] items-center justify-center gap-[1.35rem] opacity-90">
+            <Image
+              src={peatonalLogo}
+              alt="Peatonal"
+              className="h-auto w-[6.25rem] translate-y-[0.12rem] object-contain"
+            />
+            <Image
+              src={atmoLogo}
+              alt="Studio ATMO"
+              className="h-auto w-[8.45rem] object-contain"
+            />
+          </div>
         </div>
       </section>
     </main>
