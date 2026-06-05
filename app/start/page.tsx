@@ -1,35 +1,28 @@
-import Image from "next/image";
-import bgStartImage from "@/assets/bg-start.png";
-import atmoLogo from "@/assets/atmo.png";
-import peatonalLogo from "@/assets/peatonal.avif";
+import finishBackground from "@/assets/finish-background.webp";
+import { PartnerLogos } from "@/components/partner-logos";
 import Link from "next/link";
 
 export default function StartPage() {
   return (
     <main className="min-h-svh overflow-hidden bg-black">
       <section
-        className="relative isolate flex min-h-svh w-full items-center justify-center overflow-hidden bg-cover bg-[58%_center] px-[8vw] text-center text-white"
-        style={{ backgroundImage: `url(${bgStartImage.src})` }}
+        className="relative isolate flex min-h-svh w-full items-center justify-center overflow-hidden bg-cover bg-center px-[8vw] text-center text-white"
+        style={{ backgroundImage: `url(${finishBackground.src})` }}
       >
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.4)_24%,rgba(0,0,0,0.5)_56%,rgba(0,0,0,0.72)_100%)]" />
-        <div className="absolute inset-0 -z-10 bg-black/24" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.5)_28%,rgba(0,0,0,0.56)_62%,rgba(0,0,0,0.78)_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-black/30" />
 
         <div className="flex w-full flex-col items-center">
           <div className="text-[clamp(1.45rem,5vw,1.9rem)] font-[400] leading-[1.62] tracking-[-0.055em] max-[370px]:!text-[1.22rem]">
             <p>
-              Lo que ves a tu alrededor
+              Te damos la bienvenida a
               <br />
-              no está colocado al azar.
+              ÁTMO 01 : Peatonal
             </p>
 
-            <p className="mt-[0.65rem]">
-              Cada punto es parte del recorrido.
-            </p>
-
-            <p className="mt-[0.6rem]">
-              Cada escultura…
-              <br />
-              es una puerta distinta.
+            <p className="mt-[0.85rem]">
+              Un espacio digital que amplía el arte, el concepto y la
+              experiencia
             </p>
           </div>
 
@@ -40,17 +33,8 @@ export default function StartPage() {
             Empezar
           </Link>
 
-          <div className="mt-[1.7rem] flex h-[2.1rem] items-center justify-center gap-[1.35rem] opacity-90">
-            <Image
-              src={peatonalLogo}
-              alt="Peatonal"
-              className="h-auto w-[6.25rem] translate-y-[0.12rem] object-contain"
-            />
-            <Image
-              src={atmoLogo}
-              alt="Studio ATMO"
-              className="h-auto w-[8.45rem] object-contain"
-            />
+          <div className="mt-[1.7rem]">
+            <PartnerLogos />
           </div>
         </div>
       </section>

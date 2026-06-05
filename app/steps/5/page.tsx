@@ -15,6 +15,14 @@ export default function StepFivePage() {
     <NimboStepScreen
       backgroundImage={stepBackground}
       backgroundPosition="center 42%"
+      subtitle={
+        <>
+          Toma una foto o graba un video con
+          <br />
+          NIMBUS - Flujo del ahora
+        </>
+      }
+      title="Encuentra esta pieza en la realidad"
       image={stepImage}
       imageAlt="Pieza Nimbo flujo"
       imageClassName="h-full w-auto scale-[1.08]"

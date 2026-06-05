@@ -1,4 +1,5 @@
 import finishBackground from "@/assets/finish-background.webp";
+import { PartnerLogos } from "@/components/partner-logos";
 
 function InstagramIcon() {
   return (
@@ -50,13 +51,16 @@ export default function FinishPage() {
             </p>
 
             <p className="mt-[0.85rem]">
-              Sube un story etiquetandonos
-              <br />y recibe un café <span className="font-[700]">gratis</span>
+              Sube un story o un video de la obra
+              <br />
+              en donde más te guste
             </p>
 
             <p className="mt-[0.85rem]">
               Rellena el formulario
-              <br />y recibe un postre <span className="font-[700]">gratis</span>
+              <br />
+              y recibe postre{" "}
+              <span className="font-[700]">Edición Limitada</span>
             </p>
           </div>
 
@@ -75,6 +79,10 @@ export default function FinishPage() {
             >
               <InstagramIcon />
             </a>
+
+            <div className="mt-[1.7rem]">
+              <PartnerLogos />
+            </div>
           </div>
         </div>
       </section>

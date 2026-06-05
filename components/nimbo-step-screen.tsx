@@ -2,7 +2,7 @@
 
 import Image, { type StaticImageData } from "next/image";
 import dynamic from "next/dynamic";
-import { MouseEvent, useRef, useState } from "react";
+import { MouseEvent, ReactNode, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,8 @@ type NimboStepScreenProps = {
   placementModelSrc?: string | null;
   placementUsdzSrc?: string | null;
   step: number;
+  subtitle?: ReactNode;
+  title?: ReactNode;
 };
 
 const visibleSteps = [5] as const;
@@ -95,6 +97,19 @@ export function NimboStepScreen({
   placementModelSrc,
   placementUsdzSrc,
   step,
+  subtitle = (
+    <>
+      Lo que ves a tu alrededor
+      <br />
+      no está colocado al azar.
+    </>
+  ),
+  title = (
+    <>
+      Encuentra esta pieza
+      <br />y traela a la realidad
+    </>
+  ),
 }: NimboStepScreenProps) {
   const [isLeaving, setIsLeaving] = useState(false);
   const [isPlacementOpen, setIsPlacementOpen] = useState(false);
@@ -181,8 +196,7 @@ export function NimboStepScreen({
               hasBackgroundImage && "text-white",
             )}
           >
-            Encuentra esta pieza
-            <br />y traela a la realidad
+            {title}
           </h1>
 
           <button
@@ -218,9 +232,7 @@ export function NimboStepScreen({
 
         <div className="step-layer-enter mt-[3svh] text-white [animation-delay:160ms]">
           <p className="text-[clamp(1.55rem,5.45vw,2rem)] font-[400] leading-[1.5] tracking-[-0.06em] max-[370px]:!text-[1.2rem]">
-            Lo que ves a tu alrededor
-            <br />
-            no está colocado al azar.
+            {subtitle}
           </p>
 
           <div className="mx-auto mt-[1.7rem] flex items-center justify-center gap-[1.1rem]">
