@@ -35,32 +35,15 @@ export default function FinishPage() {
         <div className="absolute inset-0 -z-10 bg-black/30" />
 
         <div className="flex w-full flex-col items-center">
-          <div className="step-layer-enter">
-            <img
-              src="https://www.studioatmoart.com/assets/images/logo-white.png"
-              alt="studio ÁTMO"
-              className="mx-auto h-auto w-[57vw] max-w-[17rem] max-[370px]:max-w-[13.5rem]"
-            />
-          </div>
-
-          <div className="step-layer-enter mt-[2.2rem] text-[clamp(1.45rem,5vw,1.85rem)] font-[400] leading-[1.4] tracking-[-0.055em] [animation-delay:80ms] max-[370px]:!text-[1.18rem]">
-            <p>Ya eres parte de este mundo.</p>
-
-            <p className="mt-[0.8rem] font-[700] tracking-[-0.07em]">
-              ¡Reclama tu reward en caja!
+          <div className="step-layer-enter text-[clamp(1.45rem,5vw,1.85rem)] font-[400] leading-[1.4] tracking-[-0.055em] max-[370px]:!text-[1.18rem]">
+            <p className="font-[700] tracking-[-0.07em]">
+              ¡Reclama tu postre Edición limitada!
             </p>
 
             <p className="mt-[0.85rem]">
-              Sube un story o un video de la obra
+              Sube un story o video de la obra
               <br />
-              en donde más te guste
-            </p>
-
-            <p className="mt-[0.85rem]">
-              Rellena el formulario
-              <br />
-              y recibe postre{" "}
-              <span className="font-[700]">Edición Limitada</span>
+              en donde más te guste.
             </p>
           </div>
 
@@ -69,7 +52,7 @@ export default function FinishPage() {
               className="inline-flex h-[2.55rem] min-w-[11.2rem] items-center justify-center rounded-[0.7rem] border-2 border-white bg-transparent px-6 text-[clamp(1rem,3.7vw,1.25rem)] font-[400] tracking-[-0.035em] text-white transition-all hover:bg-white/10 max-[370px]:h-[2.35rem] max-[370px]:!text-[0.95rem]"
               href="/#formulario"
             >
-              Ir al formulario
+              Canjear postre
             </a>
 
             <a

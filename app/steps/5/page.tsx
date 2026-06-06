@@ -1,5 +1,5 @@
 import stepBackground from "@/assets/step-background.webp";
-import stepImage from "@/assets/step-5.png";
+import stepImage from "@/assets/nimbus-no-bg.png";
 import { NimboStepScreen } from "@/components/nimbo-step-screen";
 import {
   getStepPlacementModelSrc,
@@ -24,8 +24,8 @@ export default function StepFivePage() {
       }
       title="Encuentra esta pieza en la realidad"
       image={stepImage}
-      imageAlt="Pieza Nimbo flujo"
-      imageClassName="h-full w-auto scale-[1.08]"
+      imageAlt="NIMBUS - Flujo del ahora"
+      imageClassName="h-full w-auto max-w-[72vw] object-contain"
       placementModelSrc={getStepPlacementModelSrc(step)}
       placementUsdzSrc={getStepPlacementUsdzSrc(step)}
       step={step}
