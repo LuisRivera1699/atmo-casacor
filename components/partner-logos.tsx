@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import aminiLogo from "@/assets/amini.png";
 import atmoLogo from "@/assets/atmo.png";
-import peatonalLogo from "@/assets/peatonal.avif";
+import peatonalLogo from "@/assets/peatonal.png";
 
 export function PartnerLogos() {
   return (
@@ -12,7 +12,7 @@ export function PartnerLogos() {
         alt="Peatonal"
         width={peatonalLogo.width}
         height={peatonalLogo.height}
-        className="h-[1.35rem] w-auto max-w-[5.5rem] shrink-0 object-contain sm:h-[1.5rem] sm:max-w-[6.1rem]"
+        className="h-[0.95rem] w-auto max-w-[4.5rem] shrink-0 object-contain sm:h-[1.05rem] sm:max-w-[5rem]"
       />
       <Image
         src={atmoLogo}
